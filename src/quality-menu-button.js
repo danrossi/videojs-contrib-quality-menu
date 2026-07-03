@@ -30,10 +30,10 @@ const hasResolutionInfo = function (qualityLevelList) {
  */
 const getSubLabel = function (lines) {
   if (lines >= 2160) {
-    return '4K';
+    return ' 4K';
   }
   if (lines >= 720) {
-    return 'HD';
+    return ' HD';
   }
   return '';
 };
@@ -63,10 +63,14 @@ class QualityMenuButton extends MenuButton {
     }
     this.setIcon('cog');
 
-    //set the default min levels
-    this.options_.minLevels = 1;
-
     this.qualityLevels_ = player.qualityLevels();
+
+    //set the default min levels
+    //get the config set on quality levels
+    this.options_.minLevels =
+      this.qualityLevels_.minLevels !== undefined
+        ? this.qualityLevels_.minLevels
+        : 1;
 
     this.update = this.update.bind(this);
     this.hide = this.hide.bind(this);
@@ -165,7 +169,8 @@ class QualityMenuButton extends MenuButton {
     // Add the Auto menu item
     const auto = new QualityMenuItem(this.player(), {
       //don't add levels if dispatching an auto change event to choose an auto index. HLS requires re-enabling all levels.
-      levels: this.options_.autoChange
+      //get the config from quality levels
+      levels: this.qualityLevels_.autoChange
         ? []
         : Array.prototype.map.call(this.qualityLevels_, (level, i) => i),
       label: this.localize('Auto'),
@@ -209,6 +214,9 @@ class QualityMenuButton extends MenuButton {
         const kbRate = Math.round(level.bitrate / 1000);
 
         label = `${lines}p @ ${kbRate} kbps`;
+      } else if (level.label) {
+        //get the label from the level
+        label = level.label;
       } else {
         label = lines + 'p';
       }
@@ -314,14 +322,14 @@ class QualityMenuButton extends MenuButton {
       if (useResolution) {
         subLabel = getSubLabel(selected.height);
       } else if (selected.bitrate >= this.options_.sdBitrateLimit) {
-        subLabel = 'HD';
+        subLabel = ' HD';
       }
     }
 
-    if (subLabel === 'HD') {
+    if (subLabel === ' HD') {
       this.addClass('vjs-quality-menu-button-HD-flag');
       this.removeClass('vjs-quality-menu-button-4K-flag');
-    } else if (subLabel === '4K') {
+    } else if (subLabel === ' 4K') {
       this.removeClass('vjs-quality-menu-button-HD-flag');
       this.addClass('vjs-quality-menu-button-4K-flag');
     } else {
