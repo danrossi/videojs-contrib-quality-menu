@@ -85,9 +85,15 @@ class QualityMenuItem extends MenuItem {
       innerHTML: this.localize(this.options_.subLabel || ''),
     });
 
+    //fix sub label padding and camelcase. overrides default style
+    subLabel.style.textTransform = 'capitalize';
+    subLabel.style.paddingLeft = '5px';
+
     this.subLabel_ = subLabel;
 
     if (el) {
+      //override label text camelcase
+      el.style.textTransform = 'capitalize';
       el.appendChild(subLabel);
     }
 

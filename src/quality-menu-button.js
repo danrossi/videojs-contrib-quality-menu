@@ -30,10 +30,10 @@ const hasResolutionInfo = function (qualityLevelList) {
  */
 const getSubLabel = function (lines) {
   if (lines >= 2160) {
-    return ' 4K';
+    return '4K';
   }
   if (lines >= 720) {
-    return ' HD';
+    return 'HD';
   }
   return '';
 };
@@ -322,14 +322,14 @@ class QualityMenuButton extends MenuButton {
       if (useResolution) {
         subLabel = getSubLabel(selected.height);
       } else if (selected.bitrate >= this.options_.sdBitrateLimit) {
-        subLabel = ' HD';
+        subLabel = 'HD';
       }
     }
 
-    if (subLabel === ' HD') {
+    if (subLabel === 'HD') {
       this.addClass('vjs-quality-menu-button-HD-flag');
       this.removeClass('vjs-quality-menu-button-4K-flag');
-    } else if (subLabel === ' 4K') {
+    } else if (subLabel === '4K') {
       this.removeClass('vjs-quality-menu-button-HD-flag');
       this.addClass('vjs-quality-menu-button-4K-flag');
     } else {
