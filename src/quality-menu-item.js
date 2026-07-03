@@ -13,7 +13,6 @@ const dom = videojs.dom || videojs;
  * @class QualityMenuItem
  */
 class QualityMenuItem extends MenuItem {
-
   /**
    * Creates a QualityMenuItem
    *
@@ -83,7 +82,7 @@ class QualityMenuItem extends MenuItem {
 
     const subLabel = dom.createEl('span', {
       className: 'vjs-quality-menu-item-sub-label',
-      innerHTML: this.localize(this.options_.subLabel || '')
+      innerHTML: this.localize(this.options_.subLabel || ''),
     });
 
     this.subLabel_ = subLabel;
@@ -115,14 +114,30 @@ class QualityMenuItem extends MenuItem {
       }
     }
 
-    for (let i = 0, l = this.levels_.length; i < l; i++) {
-      qualityLevels[this.levels_[i]].enabled = true;
-    }
+    for (let i = 0, l = qualityLevels.length; i < l; i++)
+      if (i !== currentlySelected) qualityLevels[i].enabled = false;
 
-    // Disable the quality level that was selected before the click if it is not
-    // associated with this menu item
-    if (currentlySelected !== -1 && this.levels_.indexOf(currentlySelected) === -1) {
-      qualityLevels[currentlySelected].enabled = false;
+    //if there is set levels on the item enable and disable other levels.
+    if (this.levels_.length) {
+      for (let i = 0, l = this.levels_.length; i < l; i++) {
+        qualityLevels[this.levels_[i]].enabled = true;
+      }
+
+      // Disable the quality level that was selected before the click if it is not
+      // associated with this menu item
+      if (
+        currentlySelected !== -1 &&
+        this.levels_.indexOf(currentlySelected) === -1
+      ) {
+        qualityLevels[currentlySelected].enabled = false;
+      }
+    } else {
+      //this is an auto change event item with no items set. To allow to set an auto level index. HLS requires enabling all levels.
+      //notify an autochange event.
+      const qualityLevels = this.player().qualityLevels();
+      qualityLevels.trigger({
+        type: 'autochange',
+      });
     }
   }
 

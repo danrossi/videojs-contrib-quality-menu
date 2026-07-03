@@ -15,7 +15,7 @@ const MenuButton = videojs.getComponent('MenuButton');
  *         True if any levels have resolution information, false if none have
  * @function hasResolutionInfo
  */
-const hasResolutionInfo = function(qualityLevelList) {
+const hasResolutionInfo = function (qualityLevelList) {
   return Array.from(qualityLevelList).some((level) => level.height);
 };
 
@@ -28,7 +28,7 @@ const hasResolutionInfo = function(qualityLevelList) {
  *         sub label for given resolution
  * @function getSubLabel
  */
-const getSubLabel = function(lines) {
+const getSubLabel = function (lines) {
   if (lines >= 2160) {
     return '4K';
   }
@@ -45,7 +45,6 @@ const getSubLabel = function(lines) {
  * @class QualityMenuButton
  */
 class QualityMenuButton extends MenuButton {
-
   /**
    * Creates a QualityMenuButton
    *
@@ -63,6 +62,9 @@ class QualityMenuButton extends MenuButton {
       this.$('.vjs-icon-placeholder').classList.add('vjs-icon-cog');
     }
     this.setIcon('cog');
+
+    //set the default min levels
+    this.options_.minLevels = 1;
 
     this.qualityLevels_ = player.qualityLevels();
 
@@ -133,7 +135,10 @@ class QualityMenuButton extends MenuButton {
 
     let groups;
 
-    if (this.options_.useResolutionLabels && hasResolutionInfo(this.qualityLevels_)) {
+    if (
+      this.options_.useResolutionLabels &&
+      hasResolutionInfo(this.qualityLevels_)
+    ) {
       groups = this.groupByResolution_();
       this.addClass('vjs-quality-menu-button-use-resolution');
     } else {
@@ -141,11 +146,11 @@ class QualityMenuButton extends MenuButton {
       this.removeClass('vjs-quality-menu-button-use-resolution');
     }
 
-    // if there is only 1 or 0 menu items, we should just return an empty list so
+    // if there is only menu items below the minLevels config of 1 , we should just return an empty list so
     // the ui does not appear when there are no options. We consider 1 to be no options
     // since Auto will have the same behavior as selecting the only other option,
     // so it is as effective as not having any options.
-    if (groups.length <= 1) {
+    if (groups.length <= this.options_.minLevels) {
       return [];
     }
 
@@ -159,12 +164,15 @@ class QualityMenuButton extends MenuButton {
 
     // Add the Auto menu item
     const auto = new QualityMenuItem(this.player(), {
-      levels: Array.prototype.map.call(this.qualityLevels_, (level, i) => i),
+      //don't add levels if dispatching an auto change event to choose an auto index. HLS requires re-enabling all levels.
+      levels: this.options_.autoChange
+        ? []
+        : Array.prototype.map.call(this.qualityLevels_, (level, i) => i),
       label: this.localize('Auto'),
       controlText: '',
       active: true,
       selected: true,
-      selectable: true
+      selectable: true,
     });
 
     this.autoMenuItem_ = auto;
@@ -212,7 +220,7 @@ class QualityMenuButton extends MenuButton {
           levels: [],
           label,
           controlText: '',
-          subLabel
+          subLabel,
         };
 
         order.push({ label, lines });
@@ -250,13 +258,13 @@ class QualityMenuButton extends MenuButton {
       {
         levels: [],
         label: 'HD',
-        controlText: 'High Definition'
+        controlText: 'High Definition',
       },
       {
         levels: [],
         label: 'SD',
-        controlText: 'Standard Definition'
-      }
+        controlText: 'Standard Definition',
+      },
     ];
 
     for (let i = 0, l = this.qualityLevels_.length; i < l; i++) {
@@ -296,8 +304,9 @@ class QualityMenuButton extends MenuButton {
    */
   handleQualityChange_() {
     const selected = this.qualityLevels_[this.qualityLevels_.selectedIndex];
-    const useResolution = (this.options_.useResolutionLabels &&
-                           hasResolutionInfo(this.qualityLevels_));
+    const useResolution =
+      this.options_.useResolutionLabels &&
+      hasResolutionInfo(this.qualityLevels_);
 
     let subLabel = '';
 
