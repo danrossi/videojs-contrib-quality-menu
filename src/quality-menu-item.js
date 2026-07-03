@@ -136,7 +136,6 @@ class QualityMenuItem extends MenuItem {
         qualityLevels[currentlySelected].enabled = false;
       //this is an auto change event item with no items set. To allow to set an auto level index. HLS requires enabling all levels.
       //notify an autochange event.
-      const qualityLevels = this.player().qualityLevels();
       qualityLevels.trigger({
         type: 'autochange',
       });
